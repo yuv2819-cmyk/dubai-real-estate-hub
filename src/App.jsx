@@ -5,8 +5,8 @@ const SidebarItem = ({ icon, label, id, activePage, setActivePage }) => (
   <button
     onClick={() => setActivePage(id)}
     className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 group ${activePage === id
-        ? 'bg-[#D4AF37]/10 text-[#D4AF37]'
-        : 'text-zinc-400 hover:bg-zinc-800 hover:text-white hover:translate-x-1'
+      ? 'bg-[#D4AF37]/10 text-[#D4AF37]'
+      : 'text-zinc-400 hover:bg-zinc-800 hover:text-white hover:translate-x-1'
       }`}
   >
     <div className={`w-5 h-5 transition-transform duration-300 ${activePage === id ? 'text-[#D4AF37] scale-110' : 'text-zinc-500 group-hover:text-white'}`}>
@@ -36,6 +36,177 @@ const StatusBadge = ({ status }) => {
     <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles[status]}`}>
       {status}
     </span>
+  );
+};
+
+const ActionButton = ({ icon, label, onClick, colorClass = "text-zinc-400 group-hover/btn:text-white" }) => (
+  <button
+    onClick={(e) => { e.stopPropagation(); onClick(); }}
+    className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 hover:scale-110 hover:bg-zinc-800/80 group/btn ${colorClass}`}
+    title={label}
+  >
+    <div className="mb-1 transition-transform duration-300 group-hover/btn:scale-110 drop-shadow-md">
+      {icon}
+    </div>
+    <span className="text-[10px] font-medium opacity-70 group-hover/btn:opacity-100 tracking-wide">{label}</span>
+  </button>
+);
+
+const AgentCard = ({ name, clients, status, load }) => {
+  const statusColors = {
+    "Top Performer": "text-green-400 bg-green-500/10 border-green-500/20",
+    "Balanced": "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    "Underutilized": "text-amber-400 bg-amber-500/10 border-amber-500/20"
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-800 rounded-xl p-5 hover:border-[#D4AF37]/30 transition-all duration-300">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center space-x-3">
+          <div className="h-10 w-10 rounded-full bg-zinc-950 flex items-center justify-center text-[#D4AF37] border border-zinc-800 font-bold">
+            {name.charAt(0)}
+          </div>
+          <div>
+            <h4 className="text-zinc-100 font-medium text-sm">{name}</h4>
+            <p className="text-zinc-500 text-xs">{clients} Active Clients</p>
+          </div>
+        </div>
+        <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded border ${statusColors[status] || "text-zinc-400"}`}>
+          {status}
+        </span>
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex justify-between text-xs">
+          <span className="text-zinc-500">Workload</span>
+          <span className="text-[#D4AF37]">{load}%</span>
+        </div>
+        <div className="h-1.5 w-full bg-zinc-950 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${load}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="h-full bg-gradient-to-r from-[#D4AF37] to-[#8C7323] rounded-full"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AnalyticsChart = () => {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  // Static path for a smooth growth curve
+  const linePath = "M0,80 C20,70 30,50 50,50 S70,20 100,10";
+  const areaPath = "M0,80 C20,70 30,50 50,50 S70,20 100,10 V100 H0 Z";
+
+  return (
+    <div className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-zinc-100 font-bold">Monthly Performance</h3>
+          <p className="text-xs text-green-400 mt-1 flex items-center">
+            ▲ 18% <span className="text-zinc-500 ml-1">growth this quarter</span>
+          </p>
+        </div>
+        <div className="flex space-x-1">
+          {['1M', '3M', '6M', '1Y'].map(range => (
+            <button key={range} className={`px-2 py-1 text-[10px] rounded hover:bg-zinc-700 ${range === '6M' ? 'bg-zinc-800 text-[#D4AF37]' : 'text-zinc-500'}`}>
+              {range}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative h-48 w-full">
+        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {/* Grid lines */}
+          {[20, 40, 60, 80].map(y => (
+            <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="#27272a" strokeWidth="0.5" strokeDasharray="2 2" />
+          ))}
+
+          {/* Area Fill */}
+          <defs>
+            <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <motion.path
+            d={areaPath}
+            fill="url(#goldGradient)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5 }}
+          />
+
+          {/* Line Stroke */}
+          <motion.path
+            d={linePath}
+            fill="none"
+            stroke="#D4AF37"
+            strokeWidth="2"
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 2, ease: "easeOut" }}
+          />
+
+          {/* Data Points */}
+          {[
+            { cx: 0, cy: 80 }, { cx: 20, cy: 70 }, // Approx points from curve
+            { cx: 50, cy: 50 }, { cx: 100, cy: 10 }
+          ].map((p, i) => (
+            <motion.circle
+              key={i}
+              cx={p.cx}
+              cy={p.cy}
+              r="1.5"
+              fill="#18181b"
+              stroke="#D4AF37"
+              strokeWidth="1"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1 + (i * 0.2), duration: 0.5 }}
+            />
+          ))}
+        </svg>
+
+        {/* X-Axis Labels */}
+        <div className="absolute bottom-0 w-full flex justify-between text-[10px] text-zinc-500 px-1">
+          {months.map((m, i) => (
+            <span key={i}>{m}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LeadDistributionItem = ({ agent, count, status }) => {
+  const statusConfig = {
+    Available: { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+    Balanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+    Busy: { color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" }
+  };
+
+  const config = statusConfig[status] || statusConfig.Balanced;
+
+  return (
+    <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/30 hover:bg-zinc-800 transition-colors">
+      <div className="flex items-center space-x-3">
+        <div className="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300">
+          {agent.split(' ').map(n => n[0]).join('')}
+        </div>
+        <span className="text-sm text-zinc-200 font-medium">{agent}</span>
+      </div>
+      <div className="flex items-center space-x-4">
+        <span className="text-xs font-semibold text-zinc-400">{count} Leads</span>
+        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${config.color} ${config.bg} ${config.border}`}>
+          {status}
+        </span>
+      </div>
+    </div>
   );
 };
 
@@ -258,6 +429,27 @@ const App = () => {
     showToast("Listing description copied");
   };
 
+  // Metric Data
+  const metrics = [
+    { label: "Total Leads", value: "1,248", change: "+12%", trend: "up" },
+    { label: "Active Deals", value: "45", change: "+5%", trend: "up" },
+    { label: "Closed Deals", value: "12", change: "+2%", trend: "up" },
+    { label: "Follow-ups Due", value: "8", change: "Action Needed", trend: "neutral", color: "text-amber-500" }
+  ];
+
+  const agents = [
+    { name: "Sarah Connor", clients: 45, status: "Top Performer", load: 92 },
+    { name: "John Wick", clients: 28, status: "Balanced", load: 65 },
+    { name: "James Bond", clients: 15, status: "Underutilized", load: 30 },
+  ];
+
+  const leadDistributionData = [
+    { agent: "Sarah Connor", count: 12, status: "Busy" },
+    { agent: "John Wick", count: 8, status: "Balanced" },
+    { agent: "James Bond", count: 3, status: "Available" },
+    { agent: "Ethan Hunt", count: 5, status: "Balanced" },
+  ];
+
   const getPageTitle = () => {
     switch (activePage) {
       case 'dashboard': return { title: 'Dashboard', subtitle: 'Welcome back, Agent' };
@@ -294,22 +486,44 @@ const App = () => {
             </p>
           </div>
 
+          {/* Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
+            {metrics.map((metric, i) => (
               <div key={i} className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-800 rounded-xl p-6 hover:border-[#D4AF37]/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-                <div className="h-10 w-10 bg-zinc-950 rounded-lg mb-4 flex items-center justify-center text-[#D4AF37]">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                  </svg>
-                </div>
-                <h3 className="text-zinc-400 text-sm font-medium">Metric {i}</h3>
-                <p className="text-2xl font-bold text-zinc-100 mt-1">2,34{i}</p>
-                <p className="text-xs text-green-500 mt-2 flex items-center">
-                  ▲ 12% <span className="text-zinc-600 ml-1">vs last month</span>
+                <h3 className="text-zinc-400 text-sm font-medium">{metric.label}</h3>
+                <p className="text-2xl font-bold text-zinc-100 mt-1">{metric.value}</p>
+                <p className={`text-xs mt-2 flex items-center ${metric.color || "text-green-500"}`}>
+                  {metric.trend === 'up' && '▲'} {metric.change} <span className="text-zinc-600 ml-1">vs last month</span>
                 </p>
               </div>
             ))}
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Analytics Chart */}
+            <div className="lg:col-span-2">
+              <AnalyticsChart />
+            </div>
+
+            {/* Agent Performance */}
+            <div className="space-y-4">
+              <h3 className="text-zinc-100 font-bold mb-2">Agent Performance</h3>
+              {agents.map((agent, i) => (
+                <AgentCard key={i} {...agent} />
+              ))}
+            </div>
+          </div>
+
+          {/* Lead Distribution Section */}
+          <div className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+            <h3 className="text-zinc-100 font-bold mb-4">Lead Distribution by Agent</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {leadDistributionData.map((item, i) => (
+                <LeadDistributionItem key={i} {...item} />
+              ))}
+            </div>
+          </div>
+
         </div>
       );
       case 'leads': return (
@@ -322,11 +536,12 @@ const App = () => {
                 <th className="py-4 px-6 text-[#D4AF37] font-medium text-sm tracking-wider">Property Interest</th>
                 <th className="py-4 px-6 text-[#D4AF37] font-medium text-sm tracking-wider">Status</th>
                 <th className="py-4 px-6 text-[#D4AF37] font-medium text-sm tracking-wider">Last Contacted</th>
+                <th className="py-4 px-6 text-[#D4AF37] font-medium text-sm tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {leads.map((lead, index) => (
-                <tr key={index} className="hover:bg-zinc-800/50 transition-colors duration-200">
+                <tr key={index} className="hover:bg-zinc-800/50 transition-colors duration-200 group">
                   <td className="py-4 px-6 text-zinc-100 font-medium">{lead.name}</td>
                   <td className="py-4 px-6 text-zinc-400">{lead.phone}</td>
                   <td className="py-4 px-6 text-zinc-300">{lead.interest}</td>
@@ -334,6 +549,28 @@ const App = () => {
                     <StatusBadge status={lead.status} />
                   </td>
                   <td className="py-4 px-6 text-zinc-500 text-sm">{lead.lastContact}</td>
+                  <td className="py-4 px-6">
+                    <div className="flex space-x-3 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                      <ActionButton
+                        icon={<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>}
+                        label="Call"
+                        onClick={() => showToast(`Calling ${lead.name}...`)}
+                        colorClass="text-zinc-400 hover:text-green-400 hover:shadow-[0_0_15px_rgba(74,222,128,0.3)]"
+                      />
+                      <ActionButton
+                        icon={<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>}
+                        label="WhatsApp"
+                        onClick={() => showToast(`Opening WhatsApp for ${lead.name}...`)}
+                        colorClass="text-zinc-400 hover:text-blue-400 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"
+                      />
+                      <ActionButton
+                        icon={<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>}
+                        label="Email"
+                        onClick={() => showToast(`Drafting email to ${lead.name}...`)}
+                        colorClass="text-zinc-400 hover:text-purple-400 hover:shadow-[0_0_15px_rgba(192,132,252,0.3)]"
+                      />
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
